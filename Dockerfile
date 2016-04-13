@@ -1,22 +1,25 @@
-FROM golang:1.5-wheezy
+FROM centos:7
 
-MAINTAINER Adam Avilla <aavilla@yp.com>
+MAINTAINER Mike Shuey <shuey@fmepnet.org>
 
 
-# Install Ceph.
 ENV CEPH_VERSION infernalis
-RUN curl -sSL 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | \
-    apt-key add -
-RUN echo deb http://ceph.com/debian-${CEPH_VERSION}/ wheezy main | \
-    tee /etc/apt/sources.list.d/ceph-${CEPH_VERSION}.list
-RUN apt-get update && \
-    apt-get install -y --force-yes \
-        librados-dev \
-        librbd-dev \
-        ceph
+ENV GOPATH=/root/work
+
+ADD ceph.repo /etc/yum.repos.d/ceph.repo
+RUN echo "${CEPH_VERSION}" > /etc/yum/vars/cephrelease && \
+    echo "el7" > /etc/yum/vars/distro && \
+    rpm --import 'https://download.ceph.com/keys/release.asc' && \
+    yum update -y &&\
+    yum install -y epel-release && \
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 && \
+    yum install -y git make golang rpm-build && \
+    yum install -y ceph librados2-devel librbd1-devel && \
+    yum clean all && \
+    mkdir /root/work
 
 
-ENV SRC_ROOT /go/src/github.com/yp-engineering/rbd-docker-plugin
+ENV SRC_ROOT /root/work/src/github.com/yp-engineering/rbd-docker-plugin
 
 # Setup our directory and give convenient path via ln.
 RUN mkdir -p ${SRC_ROOT}
@@ -29,11 +32,5 @@ RUN go get -t .
 
 # Add the rest of the files.
 ADD . ${SRC_ROOT}
-
-
-# Clean up all the apt stuff
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 
 CMD ["bash"]
