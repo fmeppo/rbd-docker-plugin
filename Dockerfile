@@ -1,10 +1,10 @@
-FROM golang:1.4.2-wheezy
+FROM golang:1.5-wheezy
 
 MAINTAINER Adam Avilla <aavilla@yp.com>
 
 
 # Install Ceph.
-ENV CEPH_VERSION hammer
+ENV CEPH_VERSION infernalis
 RUN curl -sSL 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | \
     apt-key add -
 RUN echo deb http://ceph.com/debian-${CEPH_VERSION}/ wheezy main | \
