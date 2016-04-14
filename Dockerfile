@@ -15,6 +15,7 @@ RUN echo "${CEPH_VERSION}" > /etc/yum/vars/cephrelease && \
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7 && \
     yum install -y git make golang rpm-build && \
     yum install -y ceph librados2-devel librbd1-devel && \
+    yum install -y tar && \
     yum clean all && \
     mkdir /root/work
 
